@@ -1,11 +1,6 @@
-#!/usr/bin/python3
-# -*- coding: UTF-8 -*-
-
 import re
 from urllib.request import urlopen
-
 import sys
-
 from PyQt5.QtCore import QBasicTimer
 from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5 import QtCore
@@ -47,8 +42,6 @@ def func_color(group):
 def get_score():
     response = urlopen(url)
     content = response.read().decode()
-    # with open('file', 'r') as file:
-    #     content = file.read()
     content = re.sub('Шелудяков Андрей[^&]+?</span>', func_color, content)
     pre_score = re.findall("<b>КН-101</b>(.*?)<b>КН-102</b>", content, re.DOTALL)[0]
     final_score = re.sub('<td style="width: 28%;"([^&]+?)<tr>', func_color, pre_score)
@@ -74,7 +67,7 @@ class ScoresWidget(QWidget):
         label.setText("Start")
         self.label = label
         self.timer = QBasicTimer()
-        self.timer.start(1000, self)
+        self.timer.start(60 * 1000, self)
         self.show()
 
     def keyPressEvent(self, event):
@@ -105,9 +98,7 @@ class ScoresWidget(QWidget):
 
 
 if __name__ == '__main__':
-    try:
-        app = QApplication(sys.argv)
-        ex = ScoresWidget()
-        sys.exit(app.exec_())
-    except Exception as e:
-        print(e)
+    app = QApplication(sys.argv)
+    scores_form = ScoresWidget()
+    scores_form.update()
+    sys.exit(app.exec_())
