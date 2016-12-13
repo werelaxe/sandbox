@@ -56,7 +56,7 @@ class ScoresWidget(QWidget):
 
     def initUI(self):
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.FramelessWindowHint)
-        width = 700
+        width = 720
         height = 500
         self.setGeometry(300, 300, width, height)
         label = QLabel(get_score(), self)
@@ -93,8 +93,8 @@ class ScoresWidget(QWidget):
             x_w = self.offset.x()
             y_w = self.offset.y()
             self.move(x - x_w, y - y_w)
-        except Exception as e:
-            pass  # print(e)
+        except AttributeError:
+            pass  # it's alright
 
 
 if __name__ == '__main__':
