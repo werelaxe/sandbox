@@ -14,34 +14,67 @@ from PyQt5.QtWidgets import QLabel
 url = 'http://anytask.urgu.org/course/statistics/45'
 
 
+def func_color(group):
+    data = group.group(0)
+    strings = group.group(0).split()
+    score = -1
+    name = "{} {}".format(strings[3], strings[4])
+    try:
+        if strings[11] != '</td>':
+            score = int(re.findall('[0-9]+', strings[11])[0])
+        is_andrew = False
+    except Exception as e:
+        score = int(re.findall("[0-9]+", strings[-1])[0])
+        is_andrew = True
+        name = "{} {}".format(strings[0], strings[1])
+    if is_andrew:
+        if score == -1:
+            color = 'brown'
+        elif score >= 40:
+            color = 'green'
+        else:
+            color = 'red'
+        return '<font color="' + color + '">' + name + '</font>' + data[len(name):]
+    if score == -1:
+        color = 'brown'
+    elif score >= 40:
+        color = 'green'
+    else:
+        color = 'red'
+    return data[:32] + '<font color="' + color + '">' + name + '</font>' + data[32 + len(name):]
+
+
 def get_score():
     response = urlopen(url)
     content = response.read().decode()
-    return re.findall("<b>КН-101</b>(.*?)</table>", content, re.DOTALL)[0]
+    # with open('file', 'r') as file:
+    #     content = file.read()
+    content = re.sub('Шелудяков Андрей[^&]+?</span>', func_color, content)
+    pre_score = re.findall("<b>КН-101</b>(.*?)<b>КН-102</b>", content, re.DOTALL)[0]
+    final_score = re.sub('<td style="width: 28%;"([^&]+?)<tr>', func_color, pre_score)
+    return final_score
 
 
-class Example(QWidget):
+class ScoresWidget(QWidget):
     def __init__(self):
         super().__init__()
 
         self.initUI()
 
     def initUI(self):
-        # self.statusBar().showMessage('Ready')
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.FramelessWindowHint)
-        width = 600
+        width = 700
         height = 500
         self.setGeometry(300, 300, width, height)
-        lbl1 = QLabel(get_score(), self)
-        lbl1.setGeometry(0, 0, width, height)
-        lbl1.move(0, 0)
-        lbl1.mouseMoveEvent = self.mouseMoveEvent
-        lbl1.mouseReleaseEvent = self.mouseReleaseEvent
-        lbl1.setText("Kek")
-        self.label = lbl1
-
+        label = QLabel(get_score(), self)
+        label.setGeometry(0, 0, width, height)
+        label.move(0, 0)
+        label.mouseMoveEvent = self.mouseMoveEvent
+        label.mouseReleaseEvent = self.mouseReleaseEvent
+        label.setText("Start")
+        self.label = label
         self.timer = QBasicTimer()
-        self.timer.start(10000, self)
+        self.timer.start(1000, self)
         self.show()
 
     def keyPressEvent(self, event):
@@ -72,10 +105,9 @@ class Example(QWidget):
 
 
 if __name__ == '__main__':
-    # print(get_score())
     try:
         app = QApplication(sys.argv)
-        ex = Example()
+        ex = ScoresWidget()
         sys.exit(app.exec_())
     except Exception as e:
         print(e)
